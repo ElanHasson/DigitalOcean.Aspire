@@ -61,6 +61,31 @@ public static class AppSpecGenerator
                     }
                     break;
 
+                // Database resources - must come before ContainerResource as they inherit from it
+                case IResource r when IsPostgresResource(r):
+                    spec.Databases.Add(GenerateDatabaseSpec(r, App_database_spec_engine.PG));
+                    break;
+
+                case IResource r when IsRedisResource(r):
+                    spec.Databases.Add(GenerateDatabaseSpec(r, App_database_spec_engine.REDIS));
+                    break;
+
+                case IResource r when IsMySqlResource(r):
+                    spec.Databases.Add(GenerateDatabaseSpec(r, App_database_spec_engine.MYSQL));
+                    break;
+
+                case IResource r when IsKafkaResource(r):
+                    spec.Databases.Add(GenerateDatabaseSpec(r, App_database_spec_engine.KAFKA));
+                    break;
+
+                case IResource r when IsElasticsearchResource(r):
+                    spec.Databases.Add(GenerateDatabaseSpec(r, App_database_spec_engine.OPENSEARCH));
+                    break;
+
+                case IResource r when IsOpenSearchResource(r):
+                    spec.Databases.Add(GenerateDatabaseSpec(r, App_database_spec_engine.OPENSEARCH));
+                    break;
+
                 case ContainerResource container:
                     if (IsHttpService(container))
                     {
@@ -70,15 +95,6 @@ public static class AppSpecGenerator
                     {
                         spec.Workers.Add(GenerateContainerWorkerSpec(container, registryName, gitInfo));
                     }
-                    break;
-
-                // Database resources
-                case IResource r when IsPostgresResource(r):
-                    spec.Databases.Add(GenerateDatabaseSpec(r, App_database_spec_engine.PG));
-                    break;
-
-                case IResource r when IsRedisResource(r):
-                    spec.Databases.Add(GenerateDatabaseSpec(r, App_database_spec_engine.REDIS));
                     break;
 
                 // Fallback for any resource with annotations
@@ -1058,16 +1074,71 @@ public static class AppSpecGenerator
 
     private static bool IsPostgresResource(IResource resource)
     {
+        if (resource is not IResourceWithConnectionString)
+        {
+            return false;
+        }
+        
         var typeName = resource.GetType().Name;
         return typeName.Contains("Postgres", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsRedisResource(IResource resource)
     {
+        if (resource is not IResourceWithConnectionString)
+        {
+            return false;
+        }
+        
         var typeName = resource.GetType().Name;
         return typeName.Contains("Redis", StringComparison.OrdinalIgnoreCase) ||
                typeName.Contains("Valkey", StringComparison.OrdinalIgnoreCase) ||
                typeName.Contains("Garnet", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsMySqlResource(IResource resource)
+    {
+        if (resource is not IResourceWithConnectionString)
+        {
+            return false;
+        }
+        
+        var typeName = resource.GetType().Name;
+        return typeName.Contains("MySql", StringComparison.OrdinalIgnoreCase) ||
+               typeName.Contains("MariaDb", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsKafkaResource(IResource resource)
+    {
+        if (resource is not IResourceWithConnectionString)
+        {
+            return false;
+        }
+        
+        var typeName = resource.GetType().Name;
+        return typeName.Contains("Kafka", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsElasticsearchResource(IResource resource)
+    {
+        if (resource is not IResourceWithConnectionString)
+        {
+            return false;
+        }
+        
+        var typeName = resource.GetType().Name;
+        return typeName.Contains("Elasticsearch", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsOpenSearchResource(IResource resource)
+    {
+        if (resource is not IResourceWithConnectionString)
+        {
+            return false;
+        }
+        
+        var typeName = resource.GetType().Name;
+        return typeName.Contains("OpenSearch", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

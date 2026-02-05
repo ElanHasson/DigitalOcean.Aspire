@@ -21,6 +21,9 @@
     </PackageReference>
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="Aspire.Hosting.Testing" />
+    <PackageReference Include="Aspire.Hosting.Elasticsearch" />
+    <PackageReference Include="Aspire.Hosting.Kafka" />
+    <PackageReference Include="Aspire.Hosting.MySql" />
   </ItemGroup>
 
   <ItemGroup>

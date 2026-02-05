@@ -108,4 +108,105 @@ public class AppSpecGeneratorTests
         yaml.Should().NotContain("workers:");
         yaml.Should().NotContain("databases:");
     }
+
+    [Fact]
+    public void Generate_WithMySqlResource_GeneratesDatabaseSpecWithMySqlEngine()
+    {
+        // Arrange
+        var builder = DistributedApplication.CreateBuilder();
+        var mysql = builder.AddMySql("test-mysql");
+        var resources = new IResource[] { mysql.Resource };
+
+        // Act
+        var spec = AppSpecGenerator.Generate("test-app", "nyc", resources);
+
+        // Assert
+        spec.Databases.Should().HaveCount(1);
+        var dbSpec = spec.Databases.First();
+        dbSpec.Name.Should().Be("test-mysql");
+        dbSpec.Engine.Should().Be(App_database_spec_engine.MYSQL);
+        dbSpec.Production.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Generate_WithKafkaResource_GeneratesDatabaseSpecWithKafkaEngine()
+    {
+        // Arrange
+        var builder = DistributedApplication.CreateBuilder();
+        var kafka = builder.AddKafka("test-kafka");
+        var resources = new IResource[] { kafka.Resource };
+
+        // Act
+        var spec = AppSpecGenerator.Generate("test-app", "nyc", resources);
+
+        // Assert
+        spec.Databases.Should().HaveCount(1);
+        var dbSpec = spec.Databases.First();
+        dbSpec.Name.Should().Be("test-kafka");
+        dbSpec.Engine.Should().Be(App_database_spec_engine.KAFKA);
+        dbSpec.Production.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Generate_WithElasticsearchResource_GeneratesDatabaseSpecWithOpenSearchEngine()
+    {
+        // Arrange
+        var builder = DistributedApplication.CreateBuilder();
+        var elasticsearch = builder.AddElasticsearch("test-elasticsearch");
+        var resources = new IResource[] { elasticsearch.Resource };
+
+        // Act
+        var spec = AppSpecGenerator.Generate("test-app", "nyc", resources);
+
+        // Assert
+        spec.Databases.Should().HaveCount(1);
+        var dbSpec = spec.Databases.First();
+        dbSpec.Name.Should().Be("test-elasticsearch");
+        dbSpec.Engine.Should().Be(App_database_spec_engine.OPENSEARCH);
+        dbSpec.Production.Should().BeFalse();
+    }
+
+    [Fact]
+    public void Generate_WithMultipleDatabases_GeneratesAllDatabaseSpecs()
+    {
+        // Arrange
+        var builder = DistributedApplication.CreateBuilder();
+        var mysql = builder.AddMySql("mysql-db");
+        var kafka = builder.AddKafka("kafka-broker");
+        var elasticsearch = builder.AddElasticsearch("search-engine");
+        var resources = new IResource[] { mysql.Resource, kafka.Resource, elasticsearch.Resource };
+
+        // Act
+        var spec = AppSpecGenerator.Generate("test-app", "nyc", resources);
+
+        // Assert
+        spec.Databases.Should().HaveCount(3);
+        
+        var mysqlSpec = spec.Databases.First(db => db.Name == "mysql-db");
+        mysqlSpec.Engine.Should().Be(App_database_spec_engine.MYSQL);
+
+        var kafkaSpec = spec.Databases.First(db => db.Name == "kafka-broker");
+        kafkaSpec.Engine.Should().Be(App_database_spec_engine.KAFKA);
+
+        var elasticsearchSpec = spec.Databases.First(db => db.Name == "search-engine");
+        elasticsearchSpec.Engine.Should().Be(App_database_spec_engine.OPENSEARCH);
+    }
+
+    [Fact]
+    public void ToYaml_WithDatabaseResources_IncludesDatabasesSection()
+    {
+        // Arrange
+        var builder = DistributedApplication.CreateBuilder();
+        var mysql = builder.AddMySql("test-mysql");
+        var resources = new IResource[] { mysql.Resource };
+        var spec = AppSpecGenerator.Generate("test-app", "nyc", resources);
+
+        // Act
+        var yaml = AppSpecGenerator.ToYaml(spec);
+
+        // Assert
+        yaml.Should().Contain("databases:");
+        yaml.Should().Contain("name: test-mysql");
+        yaml.Should().Contain("engine: MYSQL");
+    }
 }
