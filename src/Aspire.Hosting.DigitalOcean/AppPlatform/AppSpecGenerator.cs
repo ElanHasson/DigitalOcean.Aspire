@@ -1074,12 +1074,22 @@ public static class AppSpecGenerator
 
     private static bool IsPostgresResource(IResource resource)
     {
+        if (resource is not IResourceWithConnectionString)
+        {
+            return false;
+        }
+        
         var typeName = resource.GetType().Name;
         return typeName.Contains("Postgres", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsRedisResource(IResource resource)
     {
+        if (resource is not IResourceWithConnectionString)
+        {
+            return false;
+        }
+        
         var typeName = resource.GetType().Name;
         return typeName.Contains("Redis", StringComparison.OrdinalIgnoreCase) ||
                typeName.Contains("Valkey", StringComparison.OrdinalIgnoreCase) ||
@@ -1088,6 +1098,11 @@ public static class AppSpecGenerator
 
     private static bool IsMySqlResource(IResource resource)
     {
+        if (resource is not IResourceWithConnectionString)
+        {
+            return false;
+        }
+        
         var typeName = resource.GetType().Name;
         return typeName.Contains("MySql", StringComparison.OrdinalIgnoreCase) ||
                typeName.Contains("MariaDb", StringComparison.OrdinalIgnoreCase);
@@ -1095,18 +1110,33 @@ public static class AppSpecGenerator
 
     private static bool IsKafkaResource(IResource resource)
     {
+        if (resource is not IResourceWithConnectionString)
+        {
+            return false;
+        }
+        
         var typeName = resource.GetType().Name;
         return typeName.Contains("Kafka", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsElasticsearchResource(IResource resource)
     {
+        if (resource is not IResourceWithConnectionString)
+        {
+            return false;
+        }
+        
         var typeName = resource.GetType().Name;
         return typeName.Contains("Elasticsearch", StringComparison.OrdinalIgnoreCase);
     }
 
     private static bool IsOpenSearchResource(IResource resource)
     {
+        if (resource is not IResourceWithConnectionString)
+        {
+            return false;
+        }
+        
         var typeName = resource.GetType().Name;
         return typeName.Contains("OpenSearch", StringComparison.OrdinalIgnoreCase);
     }
